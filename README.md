@@ -2,7 +2,7 @@
 
 C++ compile and link
 ```bash
-g++ -o bin/main main.cpp # compile and link object file
+g++ main.cpp -o bin/main # compile and link object file
 g++ -S main.cpp # compile the assembly code
 ./bin/main
 ```
