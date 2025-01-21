@@ -3,7 +3,9 @@
 #include <stdint.h>
 #include <assert.h>
 
-typedef struct {
+struct Arena;
+
+typedef struct Arena {
 	size_t capacity;
 	size_t size;
 	uint8_t *data;
@@ -21,6 +23,7 @@ Arena arena_init(size_t capacity) {
 		.capacity = capacity,
 		.size = 0,
 		.data = data,
+		.next = NULL,
 	};
 	return arena;
 }
@@ -30,20 +33,17 @@ void *arena_alloc(Arena *arena, size_t size) {
 	Arena *current = arena;
 	assert(current != NULL);
 
-	// whether left space in each arena is sufficient
 	while(current->size + size > current->capacity) {
-		// if this is the last node
 		if(current->next == NULL) {
-			Arena next = arena_init(arena->capacity);
-			current->next = &next;
+			Arena *next = (Arena*)malloc(sizeof(Arena));
+			*next = arena_init(arena->capacity);
+			current->next = next;
 		}
-		// traverse next if this not the last node
 		current = current->next;   
 	}
 
-	// found one arena have valid left space
-	void *data = &arena->data[arena->size];
-	arena->size += size;
+	void *data = &current->data[current->size];
+	current->size += size;
 	return data;
 }
 
@@ -59,13 +59,19 @@ void arena_free(Arena *arena) {
 }
 
 void print_arena(Arena *arena) {
-	printf("capacity: %zu, size: %zu, data_ptr: %p\n", 
-			arena->capacity, arena->size, arena->data);
+	Arena *current = arena;
+	while(current != NULL) {
+		printf("capacity: %zu, size: %zu, data_ptr: %p\n", 
+		current->capacity, current->size, current->data);
+		current = current->next;
+	}
 }
 
 int main() {
-	Arena arena = arena_init(1024);
-	void *head = arena_alloc(&arena, sizeof(uint32_t));
+	Arena arena = arena_init(10);
+	void *data1 = arena_alloc(&arena, sizeof(uint32_t));
+	void *data2 = arena_alloc(&arena, sizeof(uint32_t));
+	void *data3 = arena_alloc(&arena, sizeof(uint32_t));
 	print_arena(&arena);
 	arena_free(&arena);
 	printf("Finished\n");
