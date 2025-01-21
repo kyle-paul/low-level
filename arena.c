@@ -35,11 +35,10 @@ void *arena_alloc(Arena *arena, size_t size) {
 
 	while(current->size + size > current->capacity) {
 		if(current->next == NULL) {
-			Arena *next = (Arena*)malloc(sizeof(Arena));
-			*next = arena_init(arena->capacity);
-			current->next = next;
+			current->next = (Arena*)malloc(sizeof(Arena));
+			*current->next = arena_init(arena->capacity);
 		}
-		current = current->next;   
+		current = current->next;
 	}
 
 	void *data = &current->data[current->size];
