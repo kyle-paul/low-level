@@ -2,6 +2,6 @@
 
 int main()
 {
-    unsigned int a = 10;
-    std::cout << a << '\n';
+	int *ptr = new int(10);
+	delete ptr;
 }
